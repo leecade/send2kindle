@@ -86,21 +86,25 @@ const contentType = CONTENT_TYPES[extname]
 // step 0: get csrfToken
 // https://www.amazon.com/sendtokindle
 // <input type='hidden' name='csrfToken' value='hNRatpOqodR1cTkH298m21jD6fRbkLPvb8vrAxxEmYggAAAAAGQ9gWwAAAAB' />
-const csrfToken = await fetch('https://www.amazon.com/sendtokindle', {
+
+// TODO: The cookie frequently appears not to have expired, but the HTML obtained is expired, resulting in failure to obtain the csrfToken.
+// retry here?
+const csrfToken = await fetch('https://www.amazon.com/sendtokindle/empty', {
   headers: {
     cookie,
   },
 })
-  .then((res) => res.text())
   .catch((err) => {
     console.error('Get csrfToken error:', err)
   })
-  .then((text) => text.match(/csrfToken' value='(.*)'/)[1])
+  .then((res) => res.text())
+  .then((text) => /name='csrfToken' value='(.*)' \/>/gm.exec(text)[1])
+  .catch((err) => {
+    console.error('Get csrfToken error:', err)
+  })
 
 if (!csrfToken) {
-  console.error(
-    'Cookie is expired, paste from: https://www.amazon.com/sendtokindle`'
-  )
+  console.error('Cookie is expired, please get your cookie again`')
   process.exit()
 }
 
@@ -187,4 +191,4 @@ if (!status) {
   process.exit()
 }
 
-console.log(`${filename} send success.`)
+console.log(`✓ ${filename} has been sent.`)
