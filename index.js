@@ -131,7 +131,12 @@ const { uploadUrl, stkToken } = await fetch(
     body: JSON.stringify(initParams),
     method: 'POST',
   }
-).then((res) => res.json())
+)
+  .then((res) => res.json())
+  .catch((err) => {
+    console.error('Cookie is expired, please get your cookie again`')
+    process.exit()
+  })
 
 // console.log('stkToken:', stkToken)
 
